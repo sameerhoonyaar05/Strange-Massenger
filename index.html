@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Strange Messenger — Letters to Strangers</title>
+  <meta name="description"
+    content="Send anonymous letters to random strangers across India and receive heartfelt thoughts in your mailbox. 100% free, peaceful, and anonymous.">
+  <link rel="stylesheet" href="./src/style.css">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>✉️</text></svg>">
+</head>
+
+<body>
+
+  <!-- App Wrapper -->
+  <div class="app-container">
+
+    <!-- Top App Header -->
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <div class="brand-logo-seal">S</div>
+        <div>
+          <h1 class="brand-title">Strange Messenger</h1>
+          <div class="brand-subtitle">Letters to Strangers</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.6rem;">
+        <button id="sound-toggle-btn" class="sound-toggle-btn" type="button" title="Sound Effects (On/Off)">🔊</button>
+        <div id="auth-btn-container">
+          <!-- Filled dynamically by auth.js -->
+          <button id="google-login-btn" class="btn btn-primary btn-sm">Sign in with Google</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Missing Credentials Alert Banner (Helps beginner get started without editing code) -->
+    <div id="config-banner"
+      style="display:none; padding: 0.75rem 1.25rem; background: #fdf5e6; border-bottom: 1px solid #ebd9b8; font-size: 0.85rem; text-align: center;">
+      ⚙️ <strong>Supabase connection needed:</strong>
+      <button id="open-config-btn" class="btn btn-secondary btn-sm"
+        style="margin-left: 0.5rem; padding: 0.2rem 0.6rem; font-size: 0.75rem;">Enter Supabase Keys</button>
+    </div>
+
+    <!-- Main Content Views -->
+    <main class="main-content">
+
+      <!-- ================================================================== -->
+      <!-- VIEW 1: INBOX -->
+      <!-- ================================================================== -->
+      <section id="view-inbox" class="view-section active">
+        <!-- In-Transit Traveling Letters Section -->
+        <div id="inbox-transit-list"></div>
+
+        <!-- Delivered Received Letters Section -->
+        <div id="inbox-delivered-list"></div>
+
+        <!-- Empty State -->
+        <div id="inbox-empty-state" class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-title">Your Mailbox is Quiet</div>
+          <p>Sign in with Google and write a letter to send into the world — you will receive a stranger's letter in
+            return!</p>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- VIEW 2: COMPOSE LETTER -->
+      <!-- ================================================================== -->
+      <section id="view-compose" class="view-section">
+        <div class="compose-paper">
+
+          <!-- Daily Writing Prompt Banner -->
+          <div class="prompt-card">
+            <div class="prompt-tag">
+              <span>Today's Writing Prompt</span>
+              <button id="shuffle-prompt-btn" class="prompt-shuffle-btn" type="button" title="Get another prompt">
+                <span>🔄 Shuffle</span>
+              </button>
+            </div>
+            <div id="prompt-text" class="prompt-text">
+              "Tell a stranger what you never had the courage to say in person."
+            </div>
+          </div>
+
+          <form id="compose-form">
+            <!-- Postmark State Selector -->
+            <div class="form-group">
+              <label class="form-label" for="letter-state-select">Your Postmark (State / UT)</label>
+              <select id="letter-state-select" class="form-select" required>
+                <option value="">Select your State or UT...</option>
+              </select>
+              <div style="font-size:0.75rem; color:var(--ink-muted); margin-top:0.25rem;">
+                Shows only your state (e.g., "From Lucknow" or "From Maharashtra"), never your exact address.
+              </div>
+            </div>
+
+            <!-- Mood Selector -->
+            <div class="form-group">
+              <label class="form-label">Select Mood</label>
+              <div id="mood-grid" class="mood-grid">
+                <!-- Dynamically generated with Calm, Happy, Sad, Strange, Angry -->
+              </div>
+            </div>
+
+            <!-- Letter Body Textarea -->
+            <div class="form-group">
+              <label class="form-label" for="letter-textarea">Letter to a Stranger</label>
+              <div class="letter-textarea-wrapper">
+                <textarea id="letter-textarea" class="letter-textarea"
+                  placeholder="Dear Stranger,&#10;&#10;I am writing this from my window tonight..." rows="8"
+                  required></textarea>
+                <div class="textarea-footer">
+                  <span id="compose-guideline" style="color:var(--ink-muted);">10 to 400 words • No links • Kind
+                    language</span>
+                  <span id="word-counter" class="word-counter">0 / 400 words</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Moderation Warning -->
+            <div id="compose-warning" class="alert-banner alert-warning" style="display:none;"></div>
+
+            <!-- Send Status Alert -->
+            <div id="send-alert" style="display:none;"></div>
+
+            <!-- Pre-send Checklist & Submit Button -->
+            <div style="margin-top: 1.25rem;">
+              <p style="font-size:0.75rem; color:var(--ink-muted); margin-bottom:0.75rem; line-height:1.4;">
+                🕊️ <strong>Friendly reminder:</strong> Letters take 1 to 10 hours to travel to a random stranger.
+                Maximum 2 letters per day.
+              </p>
+              <button id="send-letter-btn" type="submit" class="btn btn-primary btn-block" disabled>
+                Seal & Send to a Stranger
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- VIEW 3: SENT LETTERS -->
+      <!-- ================================================================== -->
+      <section id="view-sent" class="view-section">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+          <h2 style="font-family:'Playfair Display', serif; font-size:1.3rem;">Sent Letters</h2>
+          <span style="font-size:0.8rem; color:var(--ink-muted);">Tracking & Replies</span>
+        </div>
+
+        <div id="sent-list-container"></div>
+
+        <div id="sent-empty-state" class="empty-state" style="display:none;">
+          <div class="empty-icon">📮</div>
+          <div class="empty-title">No Letters Sent Yet</div>
+          <p>When you send letters into the world, you can track their journey and view replies from strangers right
+            here.</p>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- VIEW 4: MY PROFILE & SAFETY -->
+      <!-- ================================================================== -->
+      <section id="view-profile" class="view-section">
+        <div class="profile-card">
+          <div class="profile-header">
+            <div id="profile-initial" class="profile-avatar">S</div>
+            <div>
+              <h2 id="profile-nickname" style="font-family:'Playfair Display', serif; font-size:1.4rem;">Stranger</h2>
+              <div id="profile-postmark" style="font-size:0.85rem; color:var(--ink-secondary);">Postmark: India</div>
+              <div
+                style="display:inline-flex; align-items:center; gap:0.3rem; margin-top:0.25rem; font-size:0.75rem; color:#2e5936; background:#eaf3ec; padding:0.15rem 0.5rem; border-radius:10px;">
+                <span>✓ 18+ Age Verified</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div id="stat-letters-sent" class="stat-number">0</div>
+              <div class="stat-label">Letters Sent</div>
+            </div>
+            <div class="stat-box">
+              <div id="stat-letters-received" class="stat-number">0</div>
+              <div class="stat-label">Letters Received</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy & Community Standards Box -->
+        <div class="letter-card" style="margin-top:1rem;">
+          <h3 style="font-family:'Playfair Display', serif; font-size:1.15rem; margin-bottom:0.6rem;">Safety & Community
+          </h3>
+          <p style="font-size:0.85rem; color:var(--ink-secondary); margin-bottom:1rem; line-height:1.5;">
+            Strange Messenger enforces strict anonymity. Your real Google account details are never stored in your
+            public profile or shown to other users.
+          </p>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <a href="privacy.html" class="btn btn-secondary btn-sm" target="_blank">View Privacy Policy (DPDP Act) →</a>
+            <a href="terms.html" class="btn btn-secondary btn-sm" target="_blank">View Terms of Service (18+) →</a>
+          </div>
+        </div>
+
+        <!-- Sign Out -->
+        <div style="margin-top:1.5rem; text-align:center;">
+          <button id="sign-out-btn" class="btn btn-danger btn-sm">Sign Out of Strange Messenger</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Mobile-First) -->
+    <nav id="bottom-nav" class="bottom-nav">
+      <button class="nav-item active" data-tab="inbox" type="button">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+          <path
+            d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+        </svg>
+        <span>Inbox <span id="inbox-badge" class="nav-badge" style="display:none;">0</span></span>
+      </button>
+
+      <button class="nav-item" data-tab="compose" type="button">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+        </svg>
+        <span>Write</span>
+      </button>
+
+      <button class="nav-item" data-tab="sent" type="button">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
+        <span>Sent</span>
+      </button>
+
+      <button class="nav-item" data-tab="profile" type="button">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 1: FIRST LOGIN ONBOARDING (NICKNAME & 18+ CONFIRMATION) -->
+  <!-- ==================================================================== -->
+  <div id="onboarding-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div style="text-align:center; margin-bottom:1rem;">
+        <div class="brand-logo-seal" style="margin: 0 auto 0.75rem;">S</div>
+        <h2 class="modal-title">Welcome, Traveler</h2>
+        <p class="modal-subtitle">
+          Your real Google name and email will <strong>never</strong> be displayed to anyone. Choose an anonymous
+          nickname and postmark before entering.
+        </p>
+      </div>
+
+      <div id="onboarding-error" class="alert-banner alert-danger" style="display:none;"></div>
+
+      <form id="onboarding-form">
+        <!-- Unique Nickname Input -->
+        <div class="form-group">
+          <label class="form-label" for="onboarding-nickname">Anonymous Nickname (3 - 20 chars)</label>
+          <input type="text" id="onboarding-nickname" class="form-input"
+            placeholder="e.g. Neela Badal, Raat ka Musafir..." minlength="3" maxlength="20" required>
+          <div id="onboarding-nick-status" style="font-size:0.75rem; margin-top:0.25rem; color:var(--ink-muted);">
+            Unique nickname, letters & spaces only.
+          </div>
+        </div>
+
+        <!-- State Dropdown -->
+        <div class="form-group">
+          <label class="form-label" for="onboarding-state">Your State or Union Territory</label>
+          <select id="onboarding-state" class="form-select" required>
+            <option value="">Select State or UT...</option>
+          </select>
+          <div style="font-size:0.75rem; color:var(--ink-muted); margin-top:0.25rem;">
+            Will be shown as your letter postmark (e.g. "From Lucknow").
+          </div>
+        </div>
+
+        <!-- 18+ Checkbox & Legal Terms Agreement -->
+        <div class="form-group"
+          style="margin-top:1.25rem; padding:0.75rem; background:#fbf8f2; border-radius:10px; border:1px solid var(--border-paper);">
+          <label
+            style="display:flex; align-items:flex-start; gap:0.6rem; cursor:pointer; font-size:0.85rem; color:var(--ink-primary); line-height:1.4;">
+            <input type="checkbox" id="onboarding-adult" style="margin-top:0.2rem;" required>
+            <span>
+              I confirm that <strong>I am 18 years of age or older</strong> and agree to the
+              <a href="terms.html" target="_blank" style="color:var(--accent-seal); text-decoration:underline;">Terms of
+                Service</a> and
+              <a href="privacy.html" target="_blank"
+                style="color:var(--accent-seal); text-decoration:underline;">Privacy Policy</a>.
+            </span>
+          </label>
+        </div>
+
+        <button id="onboarding-submit-btn" type="submit" class="btn btn-primary btn-block" style="margin-top:1.25rem;">
+          Enter Strange Messenger
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 2: LETTER DETAIL READER & REPLY -->
+  <!-- ==================================================================== -->
+  <div id="letter-detail-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div
+        style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px dashed var(--border-paper);">
+        <div>
+          <h2 id="modal-sender-nickname" class="modal-title" style="margin-bottom:0.15rem;">Stranger</h2>
+          <span id="modal-postmark" class="postmark-stamp">From India</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <span id="modal-mood" class="mood-pill mood-calm">calm</span>
+          <button id="letter-modal-close" class="btn btn-secondary btn-sm" type="button"
+            style="padding:0.25rem 0.55rem;">✕</button>
+        </div>
+      </div>
+
+      <!-- Letter Body -->
+      <div id="modal-body" class="letter-body" style="font-size:1.05rem; line-height:1.8;"></div>
+
+      <!-- Safety Actions (Report & Block) -->
+      <div
+        style="display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; margin:1rem 0; padding-top:0.75rem; border-top:1px dashed var(--border-paper);">
+        <button id="btn-report-letter" class="btn btn-secondary btn-sm" type="button"
+          title="Report inappropriate content">
+          🚩 Report Letter
+        </button>
+        <button id="btn-block-sender" class="btn btn-danger btn-sm" type="button"
+          title="Block sender from future delivery">
+          🚫 Block Stranger
+        </button>
+        <button id="btn-delete-letter" class="btn btn-danger btn-sm" type="button" style="display:none;"
+          title="Delete this letter">
+          🗑️ Delete Letter
+        </button>
+      </div>
+
+      <!-- Previous Replies List -->
+      <div style="margin-top:1.5rem;">
+        <h4 style="font-family:'Playfair Display', serif; font-size:1.1rem; margin-bottom:0.5rem;">Conversation</h4>
+        <div id="modal-replies-list"></div>
+      </div>
+
+      <!-- Reply Composer Form (Max 400 words) -->
+      <form id="reply-form" style="margin-top:1.25rem;">
+        <div id="reply-error" class="alert-banner alert-danger" style="display:none;"></div>
+        <label class="form-label" for="reply-textarea">Reply to Original Sender</label>
+        <div class="letter-textarea-wrapper">
+          <textarea id="reply-textarea" class="letter-textarea" style="min-height:110px;"
+            placeholder="Write a thoughtful reply back to the sender... (Max 400 words)" rows="4" required></textarea>
+          <div class="textarea-footer">
+            <span style="font-size:0.75rem; color:var(--ink-muted);">Only original sender will read this</span>
+            <span id="reply-word-counter" style="font-size:0.75rem;">0 / 400 words</span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:0.75rem;">
+          Send Anonymous Reply
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 3: SUPABASE CONFIGURATION MODAL (FOR ZERO-EFFORT LOCAL SETUP) -->
+  <!-- ==================================================================== -->
+  <div id="config-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+        <h2 class="modal-title">Supabase Setup</h2>
+        <button id="config-close-btn" class="btn btn-secondary btn-sm" type="button">✕</button>
+      </div>
+      <p style="font-size:0.85rem; color:var(--ink-secondary); margin-bottom:1rem; line-height:1.5;">
+        Paste your Supabase Project URL and Anon Public Key from your Supabase Dashboard <em>(Settings → API)</em>. They
+        will be stored in your browser session.
+      </p>
+
+      <form id="config-form">
+        <div class="form-group">
+          <label class="form-label" for="config-url-input">Project URL</label>
+          <input type="url" id="config-url-input" class="form-input" placeholder="https://yourprojectid.supabase.co"
+            required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="config-key-input">Anon Public Key</label>
+          <input type="text" id="config-key-input" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5..."
+            required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save and Connect</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 4: WAX SEAL STAMPING CEREMONY OVERLAY -->
+  <!-- ==================================================================== -->
+  <div id="wax-seal-overlay" class="wax-seal-overlay" style="display:none;">
+    <div class="seal-stage">
+      <div class="vintage-envelope">
+        <div class="envelope-back-panel"></div>
+        <div class="envelope-folded-letter">
+          <div class="folded-line"></div>
+          <div class="folded-line short"></div>
+        </div>
+        <div class="envelope-pocket"></div>
+        <div class="envelope-top-flap"></div>
+        <div class="wax-seal-emblem">
+          <div class="wax-seal-ring"></div>
+          <span class="seal-letter-glyph">S</span>
+        </div>
+      </div>
+      <div id="seal-caption" class="seal-caption">Folding your parchment...</div>
+    </div>
+  </div>
+
+  <!-- App Entrypoint Script -->
+  <script type="module" src="./src/main.js"></script>
+
+</body>
+
+</html>

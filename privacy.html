@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Strange Messenger</title>
+  <link rel="stylesheet" href="./src/style.css">
+  <style>
+    .legal-content {
+      background: var(--bg-letter);
+      padding: 2rem 1.5rem;
+      border: 1px solid var(--border-paper);
+      border-radius: 16px;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow-letter);
+    }
+
+    .legal-content h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: var(--ink-primary);
+    }
+
+    .legal-content h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent-seal);
+    }
+
+    .legal-content p,
+    .legal-content li {
+      font-size: 0.95rem;
+      color: var(--ink-secondary);
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+
+    .legal-content ul {
+      padding-left: 1.25rem;
+    }
+
+    .legal-date {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <div class="brand-logo-seal">S</div>
+        <div>
+          <div class="brand-title">Strange Messenger</div>
+          <div class="brand-subtitle">Privacy Policy</div>
+        </div>
+      </div>
+      <a href="index.html" class="btn btn-secondary btn-sm">← Back to App</a>
+    </header>
+
+    <main class="main-content">
+      <div class="legal-content">
+        <h1>Privacy Policy</h1>
+        <div class="legal-date">Last Updated: October 2026 • DPDP Act (India) Compliant Notice</div>
+
+        <p>Your privacy is the absolute core of <strong>Strange Messenger</strong>. This privacy policy explains what
+          data we collect, how it is stored, and how your anonymity is rigorously protected.</p>
+
+        <h2>1. Complete Anonymity Guarantee</h2>
+        <p>When you use Strange Messenger:</p>
+        <ul>
+          <li><strong>Never Revealed:</strong> Your real Google name, profile picture, and email address are
+            <strong>never</strong> displayed to other users or visitors.
+          </li>
+          <li><strong>What Others See:</strong> Only your chosen anonymous Nickname (e.g. <em>"Neela Badal"</em>) and
+            your selected State/UT postmark (e.g. <em>"From Lucknow"</em>). We never request or track your precise GPS
+            coordinates.</li>
+        </ul>
+
+        <h2>2. Data We Collect & Why</h2>
+        <ul>
+          <li><strong>Authentication Information:</strong> Your Google OAuth identifier and email address, processed
+            securely via Supabase Auth for login verification and to prevent spam bots.</li>
+          <li><strong>Profile Data:</strong> Your self-chosen nickname, selected state/UT, and 18+ age confirmation
+            timestamp.</li>
+          <li><strong>Letter Content:</strong> The text of letters and replies you choose to submit, their selected
+            mood, and delivery timestamps.</li>
+        </ul>
+
+        <h2>3. How Your Data is Stored (Postgres RLS)</h2>
+        <p>All data is hosted on Supabase's secure cloud infrastructure (PostgreSQL). We implement <strong>Row Level
+            Security (RLS)</strong> policies on every single database table. This ensures that no user can query or
+          inspect another user's private letters, email address, or identity.</p>
+
+        <h2>4. Your Rights Under DPDP Act (India)</h2>
+        <p>In accordance with India’s <em>Digital Personal Data Protection Act, 2023 (DPDP Act)</em>:</p>
+        <ul>
+          <li><strong>Right to Withdraw Consent & Deletion:</strong> You may request the complete deletion of your
+            account and associated letters at any time by contacting our grievance address.</li>
+          <li><strong>No Data Selling:</strong> We do not sell, rent, monetize, or share your personal data with
+            third-party advertisers or data brokers.</li>
+          <li><strong>Protection of Minors:</strong> In compliance with DPDP provisions concerning processing of
+            children's data, this platform is strictly restricted to adults aged 18 and above.</li>
+        </ul>
+
+        <h2>5. Contact & Privacy Inquiries</h2>
+        <p>For any privacy inquiries or data deletion requests, please contact the student maintainer at:</p>
+        <p><strong>Email:</strong> <code>strangemessenger.contact@gmail.com</code></p>
+
+        <div style="margin-top: 2rem; text-align: center;">
+          <a href="index.html" class="btn btn-primary">Return to Messenger</a>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+
+</html>
